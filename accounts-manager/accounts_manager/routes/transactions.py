@@ -1,10 +1,10 @@
 from datetime import datetime
-from typing import Iterable
+import math
 
 from fastapi import APIRouter, Query
 from structlog import get_logger
 
-from api_models.transations import TransactionRequest, Transaction, TransactionDirection
+from api_models.transations import TransactionRequest, Transaction, TransactionDirection, TransactionsPage
 from dal.dal import Dal
 from dal.external_models import DalTransactionDirection, DalTransactionStatus, DalTransaction
 
@@ -43,15 +43,24 @@ def get_router(dal: Dal) -> APIRouter:
 
         return dal_transaction
 
-    @router.get('/api/v1/transactions', response_model=Iterable[Transaction])
+    @router.get('/api/v1/transactions', response_model=TransactionsPage)
     def get_transactions(start_timestamp: datetime,
                          end_timestamp: datetime,
                          page: int = 0,
-                         limit: int = 100) -> Iterable[DalTransaction]:
-        dal_transactions = dal.get_paginated_transactions(start_timestamp=start_timestamp,
-                                                          end_timestamp=end_timestamp,
-                                                          page=page,
-                                                          limit=limit)
-        return dal_transactions
+                         limit: int = 100) -> TransactionsPage:
+        dal_transactions, total_count = dal.get_paginated_transactions(start_timestamp=start_timestamp,
+                                                                       end_timestamp=end_timestamp,
+                                                                       page=page,
+                                                                       limit=limit)
+        transactions = [Transaction.from_orm(dal_transaction) for dal_transaction in dal_transactions]
+        transactions_page = TransactionsPage(
+            items=transactions,
+            page=page,
+            limit=limit,
+            total_items=total_count,
+            number_of_pages=math.ceil(total_count / limit)
+        )
+
+        return transactions_page
 
     return router

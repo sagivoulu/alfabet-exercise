@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, PositiveFloat, Field
 
@@ -43,3 +43,11 @@ class Transaction(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class TransactionsPage(BaseModel):
+    items: List[Transaction]
+    page: int
+    limit: int
+    total_items: int
+    number_of_pages: int

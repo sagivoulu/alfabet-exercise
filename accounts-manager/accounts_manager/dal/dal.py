@@ -124,16 +124,25 @@ class Dal:
 
         return dal_transaction
 
-    def get_paginated_transactions(self, start_timestamp: datetime, end_timestamp: datetime, page: int = 0, limit: int = 100) -> Iterable[dal_models.DalTransaction]:
+    def get_paginated_transactions(self, start_timestamp: datetime,
+                                   end_timestamp: datetime,
+                                   page: int = 0,
+                                   limit: int = 100) -> Tuple[Iterable[dal_models.DalTransaction], int]:
         start_slice = page * limit
         end_slice = start_slice + limit
         with self._get_session() as session:
             # all_transactions = session.query(sqlalchemy_models.Transaction).all()
             # all_transactions = sqlalchemy_models.Transaction.query.all()
 
-            # Get all transaction within the timeframe, & get only the desired page
-            all_transactions = session.query(sqlalchemy_models.Transaction)\
+            # A query that returns all transactions within the given time rang
+            all_matching_transactions_query = session.query(sqlalchemy_models.Transaction)\
                 .filter(and_(sqlalchemy_models.Transaction.timestamp >= start_timestamp,
-                             sqlalchemy_models.Transaction.timestamp < end_timestamp))\
+                             sqlalchemy_models.Transaction.timestamp < end_timestamp))
+
+            # Get all matching transactions within the desired page
+            all_transactions = all_matching_transactions_query\
                 .order_by(sqlalchemy_models.Transaction.timestamp).slice(start=start_slice, stop=end_slice).all()
-            return all_transactions
+
+            # Count the total number of matching transactions without pagination
+            total_amount_of_transactions = all_matching_transactions_query.count()
+            return all_transactions, total_amount_of_transactions
