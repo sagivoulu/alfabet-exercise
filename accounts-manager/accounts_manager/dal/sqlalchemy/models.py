@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, CheckConstraint
 from sqlalchemy import String, Float, DateTime
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
@@ -15,8 +15,11 @@ class BankAccount(Base):
     __tablename__ = "bank_account"
     id: Mapped[int] = mapped_column(primary_key=True)
     owner_name: Mapped[str] = mapped_column(String)
-    # TODO: Enforce that the balance is non negative (balance >= 0)
-    balance: Mapped[float]
+    balance: Mapped[float] = mapped_column(Float)
+
+    __table_args__ = (
+        CheckConstraint(balance >= 0, name='check_balance_not_negative'),
+        {})
 
     def __repr__(self) -> str:
         return f"BankAccount(id={self.id!r}, owner_name={self.owner_name!r}, balance={self.balance!r})"

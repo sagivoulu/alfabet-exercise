@@ -49,13 +49,11 @@ def configure_logging(settings: Settings):
     structlog.configure(
         processors=processors,
 
-        # TODO: Explain this parameter
         context_class=structlog.threadlocal.wrap_dict(dict),
 
         # Defines how the logs will be printed out.
         logger_factory=structlog.stdlib.LoggerFactory(),
 
-        # TODO: Explain this parameter
         wrapper_class=structlog.stdlib.BoundLogger,
     )
 
