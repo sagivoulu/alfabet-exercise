@@ -1,0 +1,14 @@
+version: "3.4"
+
+services:
+  api:
+    image: accounts-manager
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - LOGS_DIR=/var/log
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
