@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, PositiveFloat
+from pydantic import BaseModel, PositiveFloat, Field
 
 
 class TransactionDirection(str, Enum):
@@ -32,7 +32,7 @@ class TransactionRequest(BaseModel):
 
 class Transaction(BaseModel):
     """Money transaction"""
-    transaction_id: str
+    transaction_id: str = Field(alias="id")
     src_account_id: str
     dst_account_id: str
     timestamp: datetime

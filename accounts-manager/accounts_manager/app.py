@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi_pagination import add_pagination
 import uvicorn
 from structlog import get_logger
 
@@ -24,11 +25,17 @@ def get_app() -> FastAPI:
 
     logger.info('Connecting to database')
     dal = Dal()
-    dal.initiate_connection(settings.db_connection_string.get_secret_value())
+
+    # Required for paths that return a paginated list of results
+    add_pagination(app)
 
     app.middleware("http")(add_log_context)
 
     app.include_router(get_transactions_router(dal=dal))
+
+    @app.on_event("startup")
+    def on_startup():
+        dal.initiate_connection(settings.db_connection_string.get_secret_value())
 
     @app.get('/')
     def root() -> str:

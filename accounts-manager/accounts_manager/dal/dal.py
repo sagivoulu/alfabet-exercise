@@ -1,10 +1,11 @@
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Iterable
 
 from pydantic import PositiveFloat
 import structlog
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import and_
 
 from dal import external_models as dal_models
 from dal.sqlalchemy.configuration import get_sqlalchemy_engine
@@ -122,3 +123,17 @@ class Dal:
             dal_transaction = dal_models.DalTransaction.from_orm(transaction)
 
         return dal_transaction
+
+    def get_paginated_transactions(self, start_timestamp: datetime, end_timestamp: datetime, page: int = 0, limit: int = 100) -> Iterable[dal_models.DalTransaction]:
+        start_slice = page * limit
+        end_slice = start_slice + limit
+        with self._get_session() as session:
+            # all_transactions = session.query(sqlalchemy_models.Transaction).all()
+            # all_transactions = sqlalchemy_models.Transaction.query.all()
+
+            # Get all transaction within the timeframe, & get only the desired page
+            all_transactions = session.query(sqlalchemy_models.Transaction)\
+                .filter(and_(sqlalchemy_models.Transaction.timestamp >= start_timestamp,
+                             sqlalchemy_models.Transaction.timestamp < end_timestamp))\
+                .order_by(sqlalchemy_models.Transaction.timestamp).slice(start=start_slice, stop=end_slice).all()
+            return all_transactions
