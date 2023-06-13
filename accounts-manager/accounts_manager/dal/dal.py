@@ -131,9 +131,6 @@ class Dal:
         start_slice = page * limit
         end_slice = start_slice + limit
         with self._get_session() as session:
-            # all_transactions = session.query(sqlalchemy_models.Transaction).all()
-            # all_transactions = sqlalchemy_models.Transaction.query.all()
-
             # A query that returns all transactions within the given time rang
             all_matching_transactions_query = session.query(sqlalchemy_models.Transaction)\
                 .filter(and_(sqlalchemy_models.Transaction.timestamp >= start_timestamp,
