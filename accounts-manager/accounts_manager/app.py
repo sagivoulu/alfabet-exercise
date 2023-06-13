@@ -5,7 +5,7 @@ from structlog import get_logger
 from settings import Settings
 from configure_logging import configure_logging
 from middlewares.request_logging.middleware import add_log_context
-from route import get_router
+from routes.transactions import get_router as get_transactions_router
 
 logger = get_logger()
 
@@ -23,12 +23,12 @@ def get_app() -> FastAPI:
 
     app.middleware("http")(add_log_context)
 
-    app.include_router(get_router(settings=settings))
+    app.include_router(get_transactions_router())
 
     @app.get('/')
     def root() -> str:
         logger.info('Serving the root welcome page')
-        return f'Welcome to python structlog demo: {app.title}'
+        return f'Welcome to AlfaBet Exercise: {app.title}'
 
     return app
 
