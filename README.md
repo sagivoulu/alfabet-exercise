@@ -1,4 +1,4 @@
-# alphabet-exercise
+# AlfaBet Exercise
 
 ## First task: Perform transactions
 Basically given two bank accounts & an amount (& the direction of the transaction), move the money between the accounts.
