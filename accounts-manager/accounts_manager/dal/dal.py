@@ -6,7 +6,6 @@ import structlog
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import IntegrityError
 
-# from dal.external_models import DalTransactionDirection, DalTransaction, DalTransactionStatus
 from dal import external_models as dal_models
 from dal.sqlalchemy.configuration import get_sqlalchemy_engine
 from dal.sqlalchemy import models as sqlalchemy_models
