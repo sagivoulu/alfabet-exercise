@@ -40,7 +40,9 @@ For storing the accounts & their funds we could use many databases such as:
 * MySQL
 * Microsoft SQL Server
 * Cassandra
-I will be using MongoDB because of its dynamic nature, but if other considerations like cross site replication, higher loads arise a different database can be used.
+
+I decided to use an SQL database (PostgreSQL) because of sqls strong enforcement & the support of sql alchemy.
+If other considerations like cross site replication, higher loads arise a different database can be used.
 
 Now when choosing where to store the transactions we have other concerns, such as:
 * The number of transactions can be many times larger than the number of accounts

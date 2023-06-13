@@ -9,6 +9,6 @@ COPY requirements.txt .
 RUN pip3 install -r requirements.txt --no-cache-dir && rm -f requirements.txt
 
 COPY . .
-RUN chmod +x run.sh
+RUN chmod 777 run.sh && whoami
 
 CMD /app/run.sh

@@ -32,11 +32,14 @@ class TransactionRequest(BaseModel):
 
 class Transaction(BaseModel):
     """Money transaction"""
-
+    transaction_id: str
     src_account_id: str
     dst_account_id: str
-    datetime: datetime
+    timestamp: datetime
     amount: PositiveFloat
     direction: TransactionDirection
     status: TransactionStatus
     reason: Optional[str]
+
+    class Config:
+        orm_mode = True

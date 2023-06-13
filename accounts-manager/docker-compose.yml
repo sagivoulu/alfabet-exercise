@@ -1,14 +1,27 @@
 version: "3.4"
 
 services:
-  api:
-    image: accounts-manager
-    build:
-      context: .
-      dockerfile: Dockerfile
+#  api:
+#    image: accounts-manager
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    environment:
+#      - LOGS_DIR=/var/log
+#    ports:
+#      - "8000:8000"
+#    volumes:
+#      - .:/app
+  db:
+    image: postgres:14.1-alpine
+    restart: always
     environment:
-      - LOGS_DIR=/var/log
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
-      - "8000:8000"
+      - '5432:5432'
     volumes:
-      - .:/app
+      - db:/var/lib/postgresql/data
+volumes:
+  db:
+    driver: local

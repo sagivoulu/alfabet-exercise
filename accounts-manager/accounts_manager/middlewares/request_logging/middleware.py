@@ -49,8 +49,7 @@ async def add_log_context(request: Request, call_next: RequestResponseEndpoint):
             request_metadata = {
                 **request_metadata,
                 'exception_msg': str(e),
-                'exception_type': type(e),
-                'exception': ''.join(traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__))
+                'exception_type': type(e)
             }
 
         logger.info('HTTP request complete', **request_metadata)

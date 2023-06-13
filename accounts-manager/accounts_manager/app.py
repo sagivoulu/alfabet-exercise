@@ -6,6 +6,7 @@ from settings import Settings
 from configure_logging import configure_logging
 from middlewares.request_logging.middleware import add_log_context
 from routes.transactions import get_router as get_transactions_router
+from dal.dal import Dal
 
 logger = get_logger()
 
@@ -21,9 +22,13 @@ def get_app() -> FastAPI:
 
     configure_logging(settings)
 
+    logger.info('Connecting to database')
+    dal = Dal()
+    dal.initiate_connection(settings.db_connection_string.get_secret_value())
+
     app.middleware("http")(add_log_context)
 
-    app.include_router(get_transactions_router())
+    app.include_router(get_transactions_router(dal=dal))
 
     @app.get('/')
     def root() -> str:

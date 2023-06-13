@@ -1,7 +1,8 @@
 structlog==21.5.0
 uvicorn==0.17.6
-fastapi==0.75.2
+fastapi==0.97.0
 pydantic==1.9.0
-starlette==0.17.1
-requests==2.27.1
+starlette==0.27.0
 python-dotenv==0.20.0
+sqlalchemy==2.0.16
+pg8000==1.29.6

@@ -1,1 +1,1 @@
-python3 ./demo/app.py
+python3 ./accounts_manager/app.py
