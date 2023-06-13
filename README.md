@@ -61,11 +61,38 @@ Body: {
 }
 Response: {
     "transaction_id": "GUID",
+    "transaction_timestamp": 1234, //Unix timestamp
     "src_account_id": "GUID",
     "dst_account_id": "GUID",
     "amount": 12.3,
     "direction": "debit",
     "status": "fail" // Possible values: success, fail
     "reason": "Insufficient funds" // A reason why the transaction failed. only present when the status is "fail"
+}
+```
+### Generate transactions report
+```
+Method: POST
+Route: /api/v1/transactions
+Query params:
+    page: 1    // Page of results, used for pagination
+    limit: 100 // How many results to show in each page
+    start_timestamp: 1234 // Unix timestamp of the erliest report to collect
+    end_timestamp: 5678   // Unix timestamp of the latest report to collect
+    
+Response: {
+    "transactions": [
+        {
+            "transaction_id": "GUID",
+            "transaction_timestamp": 1234, //Unix timestamp
+            "src_account_id": "GUID",
+            "dst_account_id": "GUID",
+            "amount": 12.3,
+            "direction": "debit",
+            "status": "fail" // Possible values: success, fail
+            "reason": "Insufficient funds" // A reason why the transaction failed. only present when the status is "fail"
+        },
+        {...}
+    ]
 }
 ```
