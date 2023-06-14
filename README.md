@@ -89,7 +89,7 @@ Response: {
 ```
 ### Generate transactions report
 ```
-Method: POST
+Method: GET
 Route: /api/v1/transactions
 Query params:
     page: 1    // Page of results, used for pagination
@@ -115,6 +115,29 @@ Response: {
     "limit": 100,
     "total_amount": 135,
     "total_pages": 2
+}
+```
+
+### Perform a bank transaction
+A bank transaction is a transaction without a source account. 
+This transaction is used for giving & taking money from accounts as a part of advances.
+```
+Method: POST
+Route: /api/v1/bank_transactions
+Body: {
+    "dst_account_id": "ID",
+    "amount": 12.3, // Positive Float
+    "direction": "debit", // Possible values: debit (Take from src), credit (Give to src)
+    "reason": "Advance payment week 3" // Why the transaction happened, can be used for tracking
+}
+Response: {
+    "transaction_id": "ID",
+    "transaction_timestamp": "2023-07-11 12:01:27.053", // Timestamp
+    "dst_account_id": "ID",
+    "amount": 12.3,
+    "direction": "debit",
+    "status": "fail" // Possible values: success, fail
+    "reason": "Insufficient funds" // A reason why the transaction failed. only present when the status is "fail"
 }
 ```
 
