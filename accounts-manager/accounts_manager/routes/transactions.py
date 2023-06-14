@@ -82,4 +82,8 @@ def get_router(dal: Dal) -> APIRouter:
 
         return transactions_page
 
+    # TODO: Implement a route for creating "special" Transactions where the bank gives an amount of money to an account
+    #       without taking it from another account. every BankTransaction can give / take money from an account, &
+    #       will have a reason for it (for example: Advance from bank, Payment of an advance etc...)
+
     return router
