@@ -6,7 +6,7 @@ from structlog import get_logger
 
 from api_models.advances import AdvanceRequest, Advance
 from dal.dal import Dal
-from dal import external_models as dal_models
+from dal import dal_models as dal_models
 
 logger = get_logger()
 

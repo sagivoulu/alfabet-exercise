@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import and_
 
-from dal import external_models as dal_models
+from dal import dal_models as dal_models
 from dal.sqlalchemy.configuration import get_sqlalchemy_engine
 from dal.sqlalchemy import models as sqlalchemy_models
 

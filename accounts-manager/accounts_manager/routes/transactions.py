@@ -6,7 +6,7 @@ from structlog import get_logger
 
 from api_models.transations import TransactionRequest, Transaction, TransactionDirection, TransactionsPage
 from dal.dal import Dal
-from dal.external_models import DalTransactionDirection, DalTransactionStatus, DalTransaction
+from dal.dal_models import DalTransactionDirection, DalTransactionStatus, DalTransaction
 
 logger = get_logger()
 
@@ -37,7 +37,7 @@ def get_router(dal: Dal) -> APIRouter:
                 src_account_id=transaction_request.src_account_id,
                 dst_account_id=transaction_request.dst_account_id,
                 amount=normalized_amount)
-
+            logger.debug('Money transfer was successful')
         # A ValueError is raised when there is a problem with the given parameters.
         # for example: invalid accounts, not enough funds or invalid transfer amount
         except ValueError as e:
@@ -47,7 +47,7 @@ def get_router(dal: Dal) -> APIRouter:
             failure_reason = f'Money transfer failed due to an unexpected error: {e}'
             logger.exception(failure_reason)
 
-        transfer_successful = failure_reason is not None
+        transfer_successful = failure_reason is None
         logger.info('Transaction complete', is_successful=transfer_successful, reason=failure_reason)
 
         dal_transaction = dal.create_transaction(
