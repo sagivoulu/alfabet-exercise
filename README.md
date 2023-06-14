@@ -1,6 +1,7 @@
 # AlfaBet Exercise
 
 - [AlfaBet Exercise](#alfabet-exercise)
+- [Exercise roadmap](#exercise-roadmap)
   * [First task: Perform transactions](#first-task--perform-transactions)
   * [Second task: Generate transactions report](#second-task--generate-transactions-report)
   * [Third task: Performing an advance payment](#third-task--performing-an-advance-payment)
@@ -13,6 +14,15 @@
     + [Perform a bank transaction](#perform-a-bank-transaction)
 - [Advances service](#advances-service)
   * [Concerns](#concerns)
+
+# Exercise roadmap
+ - [x] Design & implement the "perform_transaction" functionality
+ - [x] Design & implement the "download_report" functionality
+ - [x] Design the "perform_advance" functionality
+ - [x] Implement Advance creation
+ - [ ] Implement money grant / withdrawal from accounts in accounts-manager service
+ - [ ] Implement advance payment collection scheduled task (& setup celery cluster)
+
 
 ## First task: Perform transactions
 Basically given two bank accounts & an amount (& the direction of the transaction), move the money between the accounts.
