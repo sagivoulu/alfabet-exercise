@@ -1,5 +1,19 @@
 # AlfaBet Exercise
 
+- [AlfaBet Exercise](#alfabet-exercise)
+  * [First task: Perform transactions](#first-task--perform-transactions)
+  * [Second task: Generate transactions report](#second-task--generate-transactions-report)
+  * [Third task: Performing an advance payment](#third-task--performing-an-advance-payment)
+- [Components](#components)
+- [Accounts-manager service](#accounts-manager-service)
+  * [Choosing a database](#choosing-a-database)
+  * [Designing the API](#designing-the-api)
+    + [Perform transaction](#perform-transaction)
+    + [Generate transactions report](#generate-transactions-report)
+    + [Perform a bank transaction](#perform-a-bank-transaction)
+- [Advances service](#advances-service)
+  * [Concerns](#concerns)
+
 ## First task: Perform transactions
 Basically given two bank accounts & an amount (& the direction of the transaction), move the money between the accounts.
 Special considerations & edge cases:
@@ -33,7 +47,7 @@ if sum != advance amount:
     we are missing advances, alert admins
 ```
 
-# Components:
+# Components
 Thinking about the feature we have here two different responsibilities, and thus should be in two different components:
 1. Accounts-manager: Managing bank account funds & transactions between them.
 2. Advances-service: Performing advances for clients & keeping track of them.
