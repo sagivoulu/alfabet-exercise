@@ -1,7 +1,7 @@
 from datetime import datetime
 import math
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
 from structlog import get_logger
 
 from api_models.transations import TransactionRequest, Transaction, TransactionDirection, TransactionsPage
@@ -24,20 +24,30 @@ def get_router(dal: Dal) -> APIRouter:
         normalized_amount = transaction_request.amount
         if transaction_request.direction == TransactionDirection.credit:
             normalized_amount = normalized_amount * -1
-        is_successful, reason = dal.transfer_money(
-            src_account_id=transaction_request.src_account_id,
-            dst_account_id=transaction_request.dst_account_id,
-            amount=normalized_amount)
 
-        logger.info('Transaction complete', is_successful=is_successful, reason=reason)
+        failure_reason = None
+        try:
+            dal.transfer_money(
+                src_account_id=transaction_request.src_account_id,
+                dst_account_id=transaction_request.dst_account_id,
+                amount=normalized_amount)
+        except ValueError as e:
+            failure_reason = f'Transfer of funds denied. reason: {e}'
+            logger.warning(failure_reason)
+        except Exception as e:
+            failure_reason = f'Money transfer failed due to an unexpected error: {e}'
+            logger.exception(failure_reason)
+
+        transfer_successful = failure_reason is not None
+        logger.info('Transaction complete', is_successful=transfer_successful, reason=failure_reason)
 
         dal_transaction = dal.create_transaction(
             src_account_id=transaction_request.src_account_id,
             dst_account_id=transaction_request.dst_account_id,
             amount=transaction_request.amount,
             direction=DalTransactionDirection(transaction_request.direction.value),
-            status=DalTransactionStatus.successful if is_successful else DalTransactionStatus.fail,
-            reason=reason,
+            status=DalTransactionStatus.successful if transfer_successful else DalTransactionStatus.fail,
+            reason=failure_reason,
             timestamp=datetime.now()
         )
 

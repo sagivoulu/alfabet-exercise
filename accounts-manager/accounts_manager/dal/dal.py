@@ -40,63 +40,39 @@ class Dal:
 
         self.__session_maker = sessionmaker(bind=engine)
 
-    def transfer_money(self, src_account_id: str, dst_account_id: str, amount: float) -> Tuple[bool, str]:
+    def transfer_money(self, src_account_id: str, dst_account_id: str, amount: float):
 
         # TODO: If the transaction failed because there was a db change,
         #  run it again after waiting a random amount of time. after X attempts return a failure
 
         with self._get_session() as session:
-            transfer_successful = False
-            failure_reason = ''
-            try:
-                # Begin a database transaction
-                session.begin()
+            # Begin a database transaction
+            session.begin()
 
-                # Retrieve the source and destination accounts from the database with row-level locking
-                src_account = session.query(sqlalchemy_models.BankAccount).with_for_update().get(src_account_id)
-                dst_account = session.query(sqlalchemy_models.BankAccount).with_for_update().get(dst_account_id)
+            # Retrieve the source and destination accounts from the database with row-level locking
+            src_account = session.query(sqlalchemy_models.BankAccount).with_for_update().get(src_account_id)
+            dst_account = session.query(sqlalchemy_models.BankAccount).with_for_update().get(dst_account_id)
 
-                if src_account is None:
-                    raise ValueError(f"Source account with ID {src_account_id} does not exist")
-                if dst_account is None:
-                    raise ValueError(f"Destination account with ID {dst_account_id} does not exist")
-                if amount > 0 and src_account.balance < amount:
-                    raise ValueError("Insufficient funds in the source account")
-                if amount < 0 and dst_account.balance < amount * -1:
-                    raise ValueError("Insufficient funds in the destination account")
+            if src_account is None:
+                raise ValueError(f"Source account with ID {src_account_id} does not exist")
+            if dst_account is None:
+                raise ValueError(f"Destination account with ID {dst_account_id} does not exist")
+            if amount > 0 and src_account.balance < amount:
+                raise ValueError("Insufficient funds in the source account")
+            if amount < 0 and dst_account.balance < amount * -1:
+                raise ValueError("Insufficient funds in the destination account")
 
-                # Perform the transaction
-                src_account.balance -= amount
-                dst_account.balance += amount
+            # Perform the transaction
+            src_account.balance -= amount
+            dst_account.balance += amount
 
-                # Commit the changes to the database
-                session.commit()
+            # Commit the changes to the database
+            session.commit()
 
-                transfer_successful = True
-
-                logger.debug(f"Transaction completed: {amount} units transferred "
-                             f"from account {src_account_id} to account {dst_account_id}")
-                logger.debug(f"Source account balance: {src_account.balance}")
-                logger.debug(f"Destination account balance: {dst_account.balance}")
-
-            except IntegrityError as e:
-                # Rollback the transaction in case of any error
-                session.rollback()
-                logger.exception("An error occurred during the transaction:", error=str(e))
-
-                failure_reason = f'Internal error: {str(e)}'
-            except ValueError as e:
-                session.rollback()
-                logger.exception("An error occurred during the transaction:", error=str(e))
-
-                failure_reason = f'{str(e)}'
-            except Exception as e:
-                session.rollback()
-                logger.exception("An error occurred during the transaction:", error=str(e))
-
-                failure_reason = f'Internal unexpected error: {str(e)}'
-
-            return transfer_successful, failure_reason
+            logger.debug(f"Transaction completed: {amount} units transferred "
+                         f"from account {src_account_id} to account {dst_account_id}")
+            logger.debug(f"Source account balance: {src_account.balance}")
+            logger.debug(f"Destination account balance: {dst_account.balance}")
 
     def create_transaction(
             self,
