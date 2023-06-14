@@ -17,6 +17,12 @@ def get_router(dal: Dal) -> APIRouter:
 
     @router.post('/api/v1/transaction', response_model=Transaction)
     def post_transaction(transaction_request: TransactionRequest) -> DalTransaction:
+        """
+        Creates a new transfer & attempts to transfer the funds between the specified bank accounts.
+        :param transaction_request: The details of the transfer request (the bank accounts, amount etc..)
+        :return: The resulting Transaction, which includes the status specifying if
+                 the transaction was successful or not
+        """
 
         # If the transaction from account A to B of 100 units is with the direction "debit",
         # we subtract 100 units from A and add 100 units to B.
@@ -31,6 +37,9 @@ def get_router(dal: Dal) -> APIRouter:
                 src_account_id=transaction_request.src_account_id,
                 dst_account_id=transaction_request.dst_account_id,
                 amount=normalized_amount)
+
+        # A ValueError is raised when there is a problem with the given parameters.
+        # for example: invalid accounts, not enough funds or invalid transfer amount
         except ValueError as e:
             failure_reason = f'Transfer of funds denied. reason: {e}'
             logger.warning(failure_reason)

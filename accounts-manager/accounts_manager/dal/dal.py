@@ -21,6 +21,10 @@ class Dal:
     __session = None
 
     def _get_session(self) -> Session:
+        """
+        Generates a session object, needed to interact with the database
+        :return: Session instance
+        """
         if not self.__session_maker and not self.__session:
             raise ValueError('The session maker is missing. are you sure you initiated the database connection?')
 
@@ -31,7 +35,14 @@ class Dal:
 
         return self.__session
 
-    def initiate_connection(self, connection_string: str):
+    def initiate_connection(self, connection_string: str) -> None:
+        """
+        Setup all required connections to the database. This function must be called at least once before using the db
+        :param connection_string: The connection string to the databse we are connecting to.
+            The format is SQLAlchemy format
+        :return: None
+        """
+
         logger.debug('Creating sql alchemy engine')
         engine = get_sqlalchemy_engine(connection_string)
         logger.debug('creating all model schemas in database')
@@ -40,7 +51,15 @@ class Dal:
 
         self.__session_maker = sessionmaker(bind=engine)
 
-    def transfer_money(self, src_account_id: str, dst_account_id: str, amount: float):
+    def transfer_money(self, src_account_id: str, dst_account_id: str, amount: float) -> None:
+        """
+        Attempts to transfer money between the given bank accounts, & throws an error if the transfer failed.
+        Note: this function does not create a Transaction record, it has to be created separately
+        :param src_account_id: The ID of the account to take the funds from
+        :param dst_account_id: The ID of the account to grant the funds to
+        :param amount: The amount of funds to transfer (can be negative value)
+        :return: None
+        """
 
         # TODO: If the transaction failed because there was a db change,
         #  run it again after waiting a random amount of time. after X attempts return a failure
@@ -53,10 +72,13 @@ class Dal:
             src_account = session.query(sqlalchemy_models.BankAccount).with_for_update().get(src_account_id)
             dst_account = session.query(sqlalchemy_models.BankAccount).with_for_update().get(dst_account_id)
 
+            # TODO: Raise custom exceptions for known errors such as insufficient funds
             if src_account is None:
                 raise ValueError(f"Source account with ID {src_account_id} does not exist")
             if dst_account is None:
                 raise ValueError(f"Destination account with ID {dst_account_id} does not exist")
+            if src_account_id == dst_account_id:
+                raise ValueError(f"Source and destination accounts must be different accounts")
             if amount > 0 and src_account.balance < amount:
                 raise ValueError("Insufficient funds in the source account")
             if amount < 0 and dst_account.balance < amount * -1:
@@ -83,6 +105,21 @@ class Dal:
             direction: dal_models.DalTransactionDirection,
             status: dal_models.DalTransactionStatus,
             reason: Optional[str] = None) -> dal_models.DalTransaction:
+        """
+        Creates a Transaction record in the database & returns it.
+        Note: This function does not transfer the funds, this has to be done separately.
+
+        :param src_account_id: The source account id of the transaction
+        :param dst_account_id: The destination account id of the transaction
+        :param timestamp: The timestamp of when the transaction took place
+        :param amount: The amount (positive value) transferred
+        :param direction: The direction of the money transfer
+            (See documentation of DalTransactionDirection enum for more detailed explanation)
+        :param status: The state of the transfer, basically if it was successful or not
+        :param reason: The reason why the transfer failed. needed only if the transfer failed
+        :return: The created Transaction record
+        """
+        
         with self._get_session() as session:
             transaction = sqlalchemy_models.Transaction(
                 src_account_id=src_account_id,
@@ -104,6 +141,19 @@ class Dal:
                                    end_timestamp: datetime,
                                    page: int = 0,
                                    limit: int = 100) -> Tuple[Iterable[dal_models.DalTransaction], int]:
+        """
+        Searches for all transaction matching the given parameters, & returns them within the specified pagination
+        :param start_timestamp: The earliest timestamp of transaction to include.
+            Transactions can happen exactly at this time or later.
+        :param end_timestamp: The latest timestamp of transaction to include.
+            Only transaction that happened before this timestamp are included.
+        :param page: The number of the paged results to return (first page is 0)
+        :param limit: The maximum amount of elements to show in every page
+        :return: (Transactions, number_of_transactions) A tuple containing:
+            * The Iterable of all the matching transactions in the page
+            * The total number of transactions in every page (used to know how many more pages are there)
+        """
+
         start_slice = page * limit
         end_slice = start_slice + limit
         with self._get_session() as session:
